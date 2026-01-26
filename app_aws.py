@@ -16,7 +16,7 @@ from botocore.exceptions import ClientError
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "change_this_to_any_random_string")
 
-AWS_REGION = os.environ.get("AWS_REGION", "us-east-1")
+REGION = "us-east-1"
 
 USERS_TABLE_NAME = os.environ.get("USERS_TABLE_NAME", "CloudBankUsers")
 TX_TABLE_NAME = os.environ.get("TX_TABLE_NAME", "CloudBankTransactions")
@@ -24,12 +24,12 @@ ALERTS_TABLE_NAME = os.environ.get("ALERTS_TABLE_NAME", "CloudBankAlerts")
 
 SNS_TOPIC_ARN = os.environ.get("SNS_TOPIC_ARN", "")
 
-dynamodb = boto3.resource("dynamodb", region_name=AWS_REGION)
+dynamodb = boto3.resource("dynamodb", region_name=REGION)
 users_table = dynamodb.Table(USERS_TABLE_NAME)
 tx_table = dynamodb.Table(TX_TABLE_NAME)
 alerts_table = dynamodb.Table(ALERTS_TABLE_NAME)
 
-sns = boto3.client("sns", region_name=AWS_REGION) if SNS_TOPIC_ARN else None
+sns = boto3.client("sns", region_name=REGION) if SNS_TOPIC_ARN else None
 
 STAFF_INVITE_CODE = os.environ.get("STAFF_INVITE_CODE", "BANKSTAFF2026")
 LARGE_WITHDRAWAL = 5000

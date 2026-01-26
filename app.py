@@ -16,7 +16,7 @@ db = {
     "transactions": [],
     "alerts": []
 }
-
+# Staff invite code
 STAFF_INVITE_CODE = os.environ.get("STAFF_INVITE_CODE", "BANKSTAFF2026")
 LARGE_WITHDRAWAL = 5000
 LARGE_TRANSFER = 8000
