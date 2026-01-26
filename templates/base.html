@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CloudBank</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+  <header class="navbar">
+    <div class="nav-inner">
+      <a class="brand" href="{{ url_for('index') }}">CloudBank</a>
+
+      <nav class="nav-links">
+        {% if session.get("user_id") and user %}
+
+          {% if user.role == "staff" %}
+            <a class="nav-btn" href="{{ url_for('staff_dashboard') }}">Dashboard</a>
+            <a class="nav-btn" href="{{ url_for('staff_analytics') }}">Analytics</a>
+            <a class="nav-btn" href="{{ url_for('staff_alerts') }}">Alerts</a>
+            <a class="nav-btn" href="{{ url_for('staff_compliance') }}">Compliance</a>
+            <a class="nav-btn" href="{{ url_for('staff_reports') }}">Reports</a>
+            <a class="nav-btn primary" href="{{ url_for('logout') }}">Logout</a>
+
+          {% else %}
+            <a class="nav-btn" href="{{ url_for('customer_dashboard') }}">Dashboard</a>
+            <a class="nav-btn" href="{{ url_for('customer_transactions_page') }}">Transactions</a>
+            <a class="nav-btn" href="{{ url_for('customer_history') }}">History</a>
+            <a class="nav-btn primary" href="{{ url_for('logout') }}">Logout</a>
+          {% endif %}
+
+        {% else %}
+          <a class="nav-btn" href="{{ url_for('index') }}">Home</a>
+          <a class="nav-btn" href="{{ url_for('about') }}">About</a>
+          <a class="nav-btn" href="{{ url_for('login') }}">Login</a>
+          <a class="nav-btn primary" href="{{ url_for('signup') }}">Signup</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <div class="toast-wrap" id="toastWrap">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, msg in messages %}
+          <div class="toast {{ category }}">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <script>
+    window.addEventListener("load", () => {
+      const wrap = document.getElementById("toastWrap");
+      if (!wrap) return;
+
+      const toasts = wrap.querySelectorAll(".toast");
+      if (!toasts.length) return;
+
+      toasts.forEach(t => t.classList.add("show"));
+
+      setTimeout(() => {
+        toasts.forEach(t => t.classList.remove("show"));
+        setTimeout(() => wrap.innerHTML = "", 400);
+      }, 3000);
+    });
+  </script>
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      © 2026 CloudBank. All rights reserved.
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-head">
+  <div>
+    <h2>Staff Dashboard</h2>
+    <div class="muted">High-level overview of customers and platform activity.</div>
+  </div>
+  <div class="chip">Logged in as: {{ user.name }}</div>
+</div>
+
+<div class="grid4">
+  <div class="card kpi">
+    <div class="muted">Customers</div>
+    <div class="big">{{ stats.customers }}</div>
+  </div>
+
+  <div class="card kpi">
+    <div class="muted">Transactions</div>
+    <div class="big">{{ stats.transactions }}</div>
+  </div>
+
+  <div class="card kpi">
+    <div class="muted">Total Volume</div>
+    <div class="big">{{ stats.total_volume|inr }}</div>
+  </div>
+
+  <div class="card kpi">
+    <div class="muted">Active Alerts</div>
+    <div class="big">{{ stats.active_alerts }}</div>
+  </div>
+</div>
+
+<div class="grid3">
+  <div class="card">
+    <h3>System Snapshot</h3>
+
+    <div class="row" style="margin-top:10px;">
+      <div class="mini" style="flex:1;">
+        <div class="muted small">Status</div>
+        {% if stats.active_alerts > 0 %}
+          <div style="font-weight:800; margin-top:6px;">Needs Attention</div>
+          <div class="muted small" style="margin-top:4px;">{{ stats.active_alerts }} active alert(s) pending review</div>
+        {% else %}
+          <div style="font-weight:800; margin-top:6px;">Healthy</div>
+          <div class="muted small" style="margin-top:4px;">No active alerts at the moment</div>
+        {% endif %}
+      </div>
+
+      <div class="mini" style="flex:1;">
+        <div class="muted small">Last Transaction</div>
+        <div style="font-weight:800; margin-top:6px;">{{ snapshot.last_tx_time or "—" }}</div>
+        <div class="muted small" style="margin-top:4px;">Latest activity recorded</div>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:12px;">
+      <div class="mini" style="flex:1;">
+        <div class="muted small">Last Alert</div>
+        <div style="font-weight:800; margin-top:6px;">{{ snapshot.last_alert_time or "—" }}</div>
+        <div class="muted small" style="margin-top:4px;">Most recent alert created</div>
+      </div>
+
+      <div class="mini" style="flex:1;">
+        <div class="muted small">Risk Flags</div>
+        <div style="font-weight:800; margin-top:6px;">{{ snapshot.flagged_count }}</div>
+        <div class="muted small" style="margin-top:4px;">Large withdrawals / transfers flagged</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Top Customers</h3>
+    <div class="muted small" style="margin-top:6px;">Highest balances (quick view)</div>
+
+    {% if top_customers|length == 0 %}
+      <div class="muted" style="margin-top:12px;">No customers yet.</div>
+    {% else %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in top_customers %}
+            <tr>
+              <td>{{ c.name }}</td>
+              <td>{{ c.balance|inr }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h3>Active Alerts</h3>
+    <div class="muted small" style="margin-top:6px;">Most recent active alerts</div>
+
+    {% if active_alerts_preview|length == 0 %}
+      <div class="muted" style="margin-top:12px;">No active alerts.</div>
+    {% else %}
+      {% for a in active_alerts_preview %}
+        <div class="alertbox">
+          <div style="display:flex; justify-content:space-between; gap:10px;">
+            <div style="font-weight:800;">{{ a.title }}</div>
+            <div class="chip" style="padding:6px 10px;">{{ a.severity|upper }}</div>
+          </div>
+          <div class="muted small" style="margin-top:6px;">{{ a.details }}</div>
+          <div class="muted small" style="margin-top:6px;">Created: {{ a.created_at }}</div>
+        </div>
+      {% endfor %}
+      <div style="margin-top:12px;">
+        <a class="btn ghost" href="{{ url_for('staff_alerts') }}">View All Alerts</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="grid2">
+  <div class="card">
+    <div class="row">
+      <h3 style="margin:0;">Recent Transactions</h3>
+      <a class="btn ghost" href="{{ url_for('staff_analytics') }}">Analytics</a>
+    </div>
+
+    {% if recent_txs|length == 0 %}
+      <div class="muted" style="margin-top:12px;">No transactions available.</div>
+    {% else %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in recent_txs %}
+            <tr>
+              <td>{{ t.tx_id }}</td>
+              <td>{{ t.type }}</td>
+              <td>{{ t.amount|inr }}</td>
+              <td>{{ t.timestamp }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h3>Quick Notes</h3>
+    <ul class="list">
+      <li>Review any high-value withdrawal or transfer alerts.</li>
+      <li>Check compliance score regularly for steady monitoring.</li>
+      <li>Use Reports to export customer summaries and audits.</li>
+      <li>If suspicious activity increases, resolve alerts with notes.</li>
+    </ul>
+
+    <div class="mini" style="margin-top:14px;">
+      <div class="muted small">Tip</div>
+      <div style="margin-top:6px; font-weight:700;">
+        Keep alerts low by monitoring large withdrawals (≥ ₹5000) and transfers (≥ ₹8000).
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

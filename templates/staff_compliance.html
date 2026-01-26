@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-wrap">
+  <div class="page-head">
+    <div>
+      <h1>Compliance</h1>
+      <p class="muted">Key compliance metrics for monitoring and reporting.</p>
+    </div>
+  </div>
+
+  <div class="card wide">
+    <div class="row">
+      <div>
+        <h2>Compliance Status</h2>
+        <p class="muted">Overall compliance score (demo metric)</p>
+      </div>
+      <div class="score-big">{{ scores.overall }}%</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+
+    <div class="card">
+      <h3>Anti-Money Laundering (AML)</h3>
+      <p class="muted">Transaction monitoring and suspicious activity detection</p>
+
+      <div class="bar">
+        <div class="bar-fill" data-width="{{ scores.aml }}"></div>
+      </div>
+
+      <div class="bar-meta">
+        <span class="muted">Score</span>
+        <span class="value">{{ scores.aml }}%</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Know Your Customer (KYC)</h3>
+      <p class="muted">Customer identity verification completion rate</p>
+
+      <div class="bar">
+        <div class="bar-fill" data-width="{{ scores.kyc }}"></div>
+      </div>
+
+      <div class="bar-meta">
+        <span class="muted">Completion</span>
+        <span class="value">{{ scores.kyc }}%</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Transaction Monitoring</h3>
+      <p class="muted">Real-time transaction screening coverage (demo)</p>
+
+      <div class="bar">
+        <div class="bar-fill" data-width="{{ monitoring }}"></div>
+      </div>
+
+      <div class="bar-meta">
+        <span class="muted">Coverage</span>
+        <span class="value">{{ monitoring }}%</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Reporting Compliance</h3>
+      <p class="muted">Regulatory reporting submission timeliness (demo)</p>
+
+      <div class="bar">
+        <div class="bar-fill warn" data-width="{{ scores.reporting }}"></div>
+      </div>
+
+      <div class="bar-meta">
+        <span class="muted">Score</span>
+        <span class="value">{{ scores.reporting }}%</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="card wide" style="margin-top: 16px;">
+    <h3>What this means</h3>
+    <ul class="list">
+      <li><b>AML</b> decreases when active alerts increase.</li>
+      <li><b>KYC</b> improves when customers provide phone + UPI.</li>
+      <li><b>Monitoring</b> is a demo coverage metric.</li>
+      <li><b>Reporting</b> shows readiness for regulatory exports (demo).</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll(".bar-fill[data-width]").forEach(el => {
+    const val = parseFloat(el.getAttribute("data-width")) || 0;
+    el.style.width = Math.max(0, Math.min(100, val)) + "%";
+  });
+</script>
+
+{% endblock %}

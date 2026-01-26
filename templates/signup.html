@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="auth-wrap">
+  <div class="card auth auth-large">
+
+    {% if staff_mode %}
+      <h2 class="auth-title">Staff Signup</h2>
+      <p class="muted" style="text-align:center;">Invite code is required to create a staff account.</p>
+    {% else %}
+      <h2 class="auth-title">Customer Signup</h2>
+      <p class="muted" style="text-align:center;">Create your account and login to continue.</p>
+    {% endif %}
+
+    {% if error %}
+      <div class="alert danger">{{ error }}</div>
+    {% endif %}
+    {% if success %}
+      <div class="alert success">{{ success }}</div>
+    {% endif %}
+
+    <form method="post">
+
+      <label>Full Name</label>
+      <input name="name" required placeholder="Enter your full name">
+
+      <label>Email</label>
+      <input name="email" type="email" required placeholder="Enter email">
+
+      <label>Phone</label>
+      <input name="phone" required placeholder="10-digit phone number">
+
+      {% if not staff_mode %}
+        <label>UPI ID (optional)</label>
+        <input name="upi" placeholder="example@upi">
+      {% else %}
+        <label>Staff Invite Code</label>
+        <input name="invite" required placeholder="Enter invite code">
+      {% endif %}
+
+      <label>Password</label>
+      <input name="password" type="password" required placeholder="Create password">
+
+      <button class="btn full auth-btn" type="submit">Create Account</button>
+    </form>
+
+    <div class="auth-links">
+      <p>Already have an account?
+        <a href="{{ url_for('login') }}">Login</a>
+      </p>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

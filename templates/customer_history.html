@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h2>Transaction History</h2>
+    <div class="muted">Search and export your complete transaction history.</div>
+  </div>
+  <div class="btn-row">
+    <a class="btn" href="{{ url_for('customer_export_csv') }}">Export CSV</a>
+  </div>
+</div>
+
+<form class="search" method="get">
+  <input name="q" value="{{ q }}" placeholder="Search by type, amount, time, note...">
+  <button class="btn ghost" type="submit">Search</button>
+</form>
+
+<div class="card">
+  {% if txs %}
+  <table class="table">
+    <thead>
+      <tr>
+        <th>ID</th><th>Type</th><th>Amount</th><th>From</th><th>To</th><th>Time</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for t in txs %}
+      <tr>
+        <td>{{ t.tx_id }}</td>
+        <td>{{ t.type }}</td>
+        <td>${{ "%.2f"|format(t.amount) }}</td>
+        <td>{{ t.from_name }}</td>
+        <td>{{ t.to_name }}</td>
+        <td>{{ t.timestamp }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <div class="muted">No history found.</div>
+  {% endif %}
+</div>
+{% endblock %}

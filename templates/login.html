@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="card auth auth-large">
+    <h2 class="auth-title">Login to CloudBank</h2>
+
+    {% if error %}
+      <div class="alert danger">{{ error }}</div>
+    {% endif %}
+
+    <form method="post">
+      <label>Login as</label>
+      <select name="role" class="auth-select">
+        <option value="customer" {% if role_selected=="customer" %}selected{% endif %}>Customer</option>
+        <option value="staff" {% if role_selected=="staff" %}selected{% endif %}>Staff</option>
+      </select>
+
+      <label>Email</label>
+      <input name="email" type="email" placeholder="Enter email" required>
+
+      <label>Password</label>
+      <input name="password" type="password" placeholder="Enter password" required>
+
+      <button class="btn full auth-btn" type="submit">Sign In</button>
+    </form>
+
+    <div class="auth-links">
+      <p>New customer? <a href="{{ url_for('signup') }}">Create account</a></p>
+      <p>Staff? <a href="{{ url_for('staff_signup') }}">Create staff account</a> <span class="invite-note">(invite code required)</span></p>
+    </div>
+  </div>
+</div>
+{% endblock %}

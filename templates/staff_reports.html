@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h2>Reports</h2>
+    <div class="muted">Generate a quick report and export customer data.</div>
+  </div>
+  <div class="btn-row">
+    <a class="btn ghost" href="{{ url_for('staff_export_report_csv') }}">Export Customers CSV</a>
+  </div>
+</div>
+
+<div class="grid2">
+  <div class="card">
+    <h3>Generate Report</h3>
+    <form method="post">
+      <label>Report Type</label>
+      <select name="report_type">
+        <option value="quarterly">Quarterly Financial Summary</option>
+        <option value="loan">Loan Performance Report</option>
+        <option value="acquisition">Customer Acquisition Report</option>
+      </select>
+      <button class="btn full" type="submit">Generate</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>Report Output</h3>
+    {% if report %}
+      <div class="muted small">Generated: {{ report.generated_at }}</div>
+      <div class="muted">Users: <b>{{ report.total_users }}</b></div>
+      <div class="muted">Total Balance: <b>₹{{ "%.2f"|format(report.total_balance) }}</b></div>
+      <div class="muted">Deposits: <b>₹{{ "%.2f"|format(report.deposits) }}</b></div>
+      <div class="muted">Withdrawals: <b>₹{{ "%.2f"|format(report.withdrawals) }}</b></div>
+      <div class="muted">Transfers: <b>₹{{ "%.2f"|format(report.transfers) }}</b></div>
+      <div class="muted">Active Alerts: <b>{{ report.active_alerts }}</b></div>
+    {% else %}
+      <div class="muted">Generate a report to view summary here.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

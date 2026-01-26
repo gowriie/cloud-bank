@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="hero">
+  <!-- Left: Main hero -->
+  <div class="hero-left">
+    <div class="pill-row" style="margin-bottom:12px; flex-wrap:wrap;">
+      <div class="pill">Secure Auth</div>
+      <div class="pill">Transactions</div>
+      <div class="pill">Alerts</div>
+      <div class="pill">Analytics</div>
+      <div class="pill">Compliance</div>
+    </div>
+
+    <h1 style="margin-bottom:10px;">Secure Banking. Smart Insights.</h1>
+    <p class="muted" style="max-width:680px;">
+      CloudBank is a modern banking-style web app experience with secure login, validated transactions,
+      detailed history tracking, and a staff dashboard for monitoring, analytics, and compliance metrics.
+    </p>
+
+    <div class="cta" style="margin-top:18px; display:flex; gap:12px; flex-wrap:wrap;">
+      <a class="btn" href="{{ url_for('signup') }}">Create Customer Account</a>
+      <a class="btn ghost" href="{{ url_for('login') }}">Login</a>
+    </div>
+
+    <!-- Mini highlight stats -->
+    <div class="grid-2" style="margin-top:18px; gap:12px;">
+      <div class="card" style="padding:14px;">
+        <div class="muted small">Security</div>
+        <div style="font-weight:700; font-size:18px; margin-top:4px;">Identity & Access Protection</div>
+        <div class="muted small" style="margin-top:6px;">Strong authentication and secure session handling.</div>
+      </div>
+      <div class="card" style="padding:14px;">
+        <div class="muted small">Transactions</div>
+        <div style="font-weight:700; font-size:18px; margin-top:4px;">Deposit • Withdraw • Transfer</div>
+        <div class="muted small" style="margin-top:6px;">Validation checks + history logging.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Quick overview card -->
+  <div class="hero-card">
+    <h3 style="margin-bottom:10px;">What you can do</h3>
+    <ul class="list" style="margin-bottom:14px;">
+      <li>Register and login securely</li>
+      <li>Deposit / Withdraw with validation</li>
+      <li>Transfer using Phone or UPI</li>
+      <li>View history + export CSV report</li>
+      <li>Staff tools: Alerts, Analytics, Compliance, Reports</li>
+    </ul>
+
+    <div class="card" style="padding:12px; margin-top:10px;">
+      <div class="muted small">Mission</div>
+      <div style="font-weight:700; margin-top:6px;">
+        Make banking flows simple, secure, and transparent with meaningful dashboards.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features section -->
+<section class="card" style="margin-top:16px;">
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
+    <div>
+      <h3 style="margin:0;">Key Features</h3>
+      <div class="muted small" style="margin-top:6px;">
+        A clean banking workflow for customers, plus monitoring dashboards for staff.
+      </div>
+    </div>
+    <div class="pill-row" style="gap:8px; flex-wrap:wrap;">
+      <div class="pill">CSV Export</div>
+      <div class="pill">Alerts & Flagging</div>
+      <div class="pill">Role-Based Access</div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-top:14px; gap:12px;">
+    <div class="card" style="padding:14px;">
+      <div style="font-weight:700; font-size:16px;">Customer Experience</div>
+      <ul class="list" style="margin-top:10px;">
+        <li>Quick actions: Deposit / Withdraw / Transfer</li>
+        <li>Readable transaction history with search</li>
+        <li>Export transaction report as CSV</li>
+      </ul>
+    </div>
+
+    <div class="card" style="padding:14px;">
+      <div style="font-weight:700; font-size:16px;">Staff Monitoring</div>
+      <ul class="list" style="margin-top:10px;">
+        <li>Analytics overview and transaction distribution</li>
+        <li>Alerts for high-value withdrawals/transfers</li>
+        <li>Compliance metrics (AML, KYC, Reporting)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Role CTA -->
+<section class="card" style="margin-top:16px;">
+  <h3 style="margin-bottom:10px;">Get Started</h3>
+  <div class="grid-2" style="gap:12px;">
+    <div class="card" style="padding:14px;">
+      <div class="muted small">For Customers</div>
+      <div style="font-weight:700; font-size:18px; margin-top:6px;">Start banking actions in seconds</div>
+      <div class="muted small" style="margin-top:6px;">
+        Create an account, login, and manage transactions with validation and history.
+      </div>
+      <div style="margin-top:10px;">
+        <a class="btn" href="{{ url_for('signup') }}">Create Account</a>
+      </div>
+    </div>
+
+    <div class="card" style="padding:14px;">
+      <div class="muted small">For Staff</div>
+      <div style="font-weight:700; font-size:18px; margin-top:6px;">Monitor platform activity</div>
+      <div class="muted small" style="margin-top:6px;">
+        Login as staff to access analytics, compliance checks, alerts and reports.
+      </div>
+      <div style="margin-top:10px;">
+        <a class="btn ghost" href="{{ url_for('login') }}">Staff Login</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

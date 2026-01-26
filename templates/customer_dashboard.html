@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-head">
+  <div>
+    <h1>Welcome, {{ user.name }}</h1>
+    <p class="muted">Here’s a quick overview of your banking activity.</p>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card kpi">
+    <div class="muted">Available Balance</div>
+    <div class="big">{{ user.balance|inr }}</div>
+  </div>
+
+  <div class="card kpi">
+    <div class="muted">Total Deposits</div>
+    <div class="big">{{ totals.deposits|inr }}</div>
+  </div>
+
+  <div class="card kpi">
+    <div class="muted">Total Withdrawals</div>
+    <div class="big">{{ totals.withdrawals|inr }}</div>
+  </div>
+
+  <div class="card kpi">
+    <div class="muted">Total Transfers</div>
+    <div class="big">{{ totals.transfers|inr }}</div>
+  </div>
+
+  <div class="card kpi">
+    <div class="muted">Transactions</div>
+    <div class="big">{{ totals.transactions }}</div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Quick Actions</h3>
+  <div class="btn-row">
+    <a class="btn primary" href="{{ url_for('customer_transactions_page', mode='deposit') }}">Deposit</a>
+    <a class="btn primary" href="{{ url_for('customer_transactions_page', mode='withdraw') }}">Withdraw</a>
+    <a class="btn primary" href="{{ url_for('customer_transactions_page', mode='transfer') }}">Transfer</a>
+    <a class="btn" href="{{ url_for('customer_history') }}">History</a>
+  </div>
+  <p class="muted small" style="margin-top:10px;">Transfers use Phone or UPI for realistic flow.</p>
+</div>
+
+<div class="card">
+  <h3>Recent Transactions</h3>
+  {% if txs|length == 0 %}
+    <p class="muted">No transactions yet.</p>
+  {% else %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Type</th>
+          <th>Amount</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in txs %}
+          <tr>
+            <td>{{ t.tx_id }}</td>
+            <td style="text-transform:capitalize;">{{ t.type }}</td>
+            <td>{{ t.amount|inr }}</td>
+            <td>{{ t.timestamp }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+</div>
+
+{% endblock %}

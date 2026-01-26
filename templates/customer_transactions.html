@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-head">
+  <div>
+    <h2>Transactions</h2>
+    <div class="muted">Deposit / Withdraw / Transfer</div>
+  </div>
+
+  <div class="btn-row">
+    <a class="btn" href="{{ url_for('customer_dashboard') }}">← Dashboard</a>
+    <a class="btn" href="{{ url_for('customer_history') }}">History</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="btn-row" style="flex-wrap:wrap; gap:10px;">
+    <button class="btn" type="button" onclick="showPanel('depositPanel')">Deposit</button>
+    <button class="btn" type="button" onclick="showPanel('withdrawPanel')">Withdraw</button>
+    <button class="btn" type="button" onclick="showPanel('transferPanel')">Transfer</button>
+  </div>
+
+  <div class="muted small" style="margin-top:10px;">
+    Transfers use Phone or UPI for a realistic flow.
+  </div>
+</div>
+
+<!-- Deposit -->
+<div id="depositPanel" class="card">
+  <h3>Deposit</h3>
+  <form method="POST" action="{{ url_for('customer_transactions_page', mode='deposit') }}">
+    <input type="hidden" name="action" value="deposit" />
+
+    <div class="grid-2">
+      <div>
+        <label class="label">Amount (₹)</label>
+        <input class="input" type="number" name="amount" step="0.01" min="1" required />
+      </div>
+
+      <div style="display:flex; align-items:flex-end;">
+        <button class="btn" type="submit">Deposit</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Withdraw -->
+<div id="withdrawPanel" class="card" style="display:none;">
+  <h3>Withdraw</h3>
+  <form method="POST" action="{{ url_for('customer_transactions_page', mode='withdraw') }}">
+    <input type="hidden" name="action" value="withdraw" />
+
+    <div class="grid-2">
+      <div>
+        <label class="label">Amount (₹)</label>
+        <input class="input" type="number" name="amount" step="0.01" min="1" required />
+      </div>
+
+      <div style="display:flex; align-items:flex-end;">
+        <button class="btn" type="submit">Withdraw</button>
+      </div>
+    </div>
+
+    <div class="muted small" style="margin-top:8px;">
+      Available Balance: {{ user.balance|inr }}
+    </div>
+  </form>
+</div>
+
+<!-- Transfer -->
+<div id="transferPanel" class="card" style="display:none;">
+  <h3>Transfer</h3>
+  <form method="POST" action="{{ url_for('customer_transactions_page', mode='transfer') }}">
+    <input type="hidden" name="action" value="transfer" />
+
+    <div class="grid-2">
+      <div>
+        <label class="label">Send To</label>
+        <select class="input" name="identifier_type">
+          <option value="phone">Phone Number</option>
+          <option value="upi">UPI ID</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="label">Phone / UPI</label>
+        <input class="input" type="text" name="identifier_value"
+               placeholder="e.g., 9876543210 or name@upi" required />
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:10px;">
+      <div>
+        <label class="label">Amount (₹)</label>
+        <input class="input" type="number" name="amount" step="0.01" min="1" required />
+      </div>
+
+      <div>
+        <label class="label">Note (optional)</label>
+        <input class="input" type="text" name="note" placeholder="Reason / message" />
+      </div>
+    </div>
+
+    <div style="margin-top:12px;">
+      <button class="btn" type="submit">Transfer</button>
+    </div>
+
+    <div class="muted small" style="margin-top:8px;">
+      Available Balance: {{ user.balance|inr }}
+    </div>
+  </form>
+</div>
+
+<script>
+  function showPanel(id){
+    const panels = ["depositPanel","withdrawPanel","transferPanel"];
+    panels.forEach(p => {
+      const el = document.getElementById(p);
+      if(!el) return;
+      el.style.display = (p === id) ? "block" : "none";
+    });
+  }
+
+  (function(){
+    const mode = "{{ mode|default('deposit') }}";
+    if(mode === "withdraw") showPanel("withdrawPanel");
+    else if(mode === "transfer") showPanel("transferPanel");
+    else showPanel("depositPanel");
+  })();
+</script>
+
+{% endblock %}

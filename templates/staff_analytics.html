@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% block title %}Staff Analytics{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+  <div class="page-header">
+    <h1>Analytics</h1>
+    <p class="muted">Platform-level transaction distribution and trends (last 6 months).</p>
+  </div>
+
+  <div class="grid4">
+    <div class="card kpi">
+      <div class="muted">Total Customer Balance</div>
+      <div class="big">{{ cards.total_balance|inr }}</div>
+    </div>
+
+    <div class="card kpi">
+      <div class="muted">Active Customers</div>
+      <div class="big">{{ cards.active_users }}</div>
+    </div>
+
+    <div class="card kpi">
+      <div class="muted">Total Volume</div>
+      <div class="big">{{ cards.total_volume|inr }}</div>
+    </div>
+
+    <div class="card kpi">
+      <div class="muted">Flagged Alerts</div>
+      <div class="big">{{ cards.flagged }}</div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-top:18px;">
+    <div class="card chart-card">
+      <div class="card-head">
+        <h3>Last 6 Months Trend</h3>
+        <div class="pill-row" style="margin:0;">
+          <span class="pill">6 months</span>
+          <span class="pill">Auto scaled</span>
+        </div>
+      </div>
+      <div class="chart-wrap large">
+        <canvas id="monthlyChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card chart-card">
+      <div class="card-head">
+        <h3>Overall Distribution</h3>
+        <div class="muted small">Total amounts by category</div>
+      </div>
+
+      <div class="chart-split">
+        <div class="chart-wrap donut large">
+          <canvas id="distChart"></canvas>
+        </div>
+
+        <div class="dist-lines">
+          <div class="dist-item">
+            <div class="muted">Deposits</div>
+            <div class="dist-val">{{ dist.deposits|inr }}</div>
+          </div>
+          <div class="dist-item">
+            <div class="muted">Withdrawals</div>
+            <div class="dist-val">{{ dist.withdrawals|inr }}</div>
+          </div>
+          <div class="dist-item">
+            <div class="muted">Transfers</div>
+            <div class="dist-val">{{ dist.transfers|inr }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-top:18px;">
+    <div class="card">
+      <h3 style="margin:0 0 10px 0;">Operational Indicators</h3>
+
+      <div class="bar">
+        <div class="bar-label">AML Risk Score <span class="muted small">(lower is better)</span></div>
+        <div class="bar-track"><div class="bar-fill" style="--w: {{ (cards.flagged * 10) if cards.flagged < 10 else 95 }}%;"></div></div>
+      </div>
+
+      <div class="bar">
+        <div class="bar-label">KYC Completion <span class="muted small">(profile completeness)</span></div>
+        <div class="bar-track"><div class="bar-fill" style="--w: {{ 70 if cards.active_users > 0 else 0 }}%;"></div></div>
+      </div>
+
+      <div class="bar">
+        <div class="bar-label">System Health <span class="muted small">(uptime & stability)</span></div>
+        <div class="bar-track"><div class="bar-fill" style="--w: 92%;"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0 0 10px 0;">Insights</h3>
+      <ul class="list">
+        <li>Highest contribution comes from <b>Deposits</b> in most cases.</li>
+        <li>Flagged alerts currently: <b>{{ cards.flagged }}</b></li>
+        <li>Customer base is stable with <b>{{ cards.active_users }}</b> active customers.</li>
+        <li>Total platform activity volume: <b>{{ cards.total_volume|inr }}</b></li>
+      </ul>
+    </div>
+  </div>
+
+  <script id="analyticsData" type="application/json">
+  {
+    "labels": {{ monthly_labels|tojson }},
+    "deposits": {{ monthly_deposits|tojson }},
+    "withdrawals": {{ monthly_withdrawals|tojson }},
+    "transfers": {{ monthly_transfers|tojson }},
+    "dist": {
+      "deposits": {{ dist.deposits|tojson }},
+      "withdrawals": {{ dist.withdrawals|tojson }},
+      "transfers": {{ dist.transfers|tojson }}
+    }
+  }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    const raw = document.getElementById("analyticsData").textContent;
+    const data = JSON.parse(raw);
+
+    const monthlyCanvas = document.getElementById("monthlyChart");
+    const distCanvas = document.getElementById("distChart");
+
+    const gridColor = "rgba(255,255,255,0.10)";
+    const tickColor = "rgba(232,238,252,0.75)";
+
+    if (monthlyCanvas && typeof Chart !== "undefined") {
+      new Chart(monthlyCanvas.getContext("2d"), {
+        type: "bar",
+        data: {
+          labels: data.labels,
+         datasets: [
+  {
+    label: "Deposits",
+    data: data.deposits,
+    backgroundColor: "#3EE0E8",
+    hoverBackgroundColor: "#5FF3FA",
+    borderRadius: 14,
+    barThickness: 26
+  },
+  {
+    label: "Withdrawals",
+    data: data.withdrawals,
+    backgroundColor: "#FF7A8A",
+    hoverBackgroundColor: "#FF9AA7",
+    borderRadius: 14,
+    barThickness: 26
+  },
+  {
+    label: "Transfers",
+    data: data.transfers,
+    backgroundColor: "#FFC164",
+    hoverBackgroundColor: "#FFD38A",
+    borderRadius: 14,
+    barThickness: 26
+  }
+]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          datasets: {
+            bar: {
+              categoryPercentage: 0.6,
+              barPercentage: 0.9
+            }
+          },
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                color: tickColor,
+                boxWidth: 12,
+                boxHeight: 12,
+                padding: 16,
+                font: { size: 12, weight: "500" }
+              }
+            },
+            tooltip: {
+              titleColor: "#fff",
+              bodyColor: "#fff"
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: gridColor },
+              ticks: { color: tickColor, font: { size: 12, weight: "500" } }
+            },
+            y: {
+              grid: { color: gridColor },
+              ticks: { color: tickColor, font: { size: 12, weight: "500" } }
+            }
+          }
+        }
+      });
+    }
+
+    if (distCanvas && typeof Chart !== "undefined") {
+      new Chart(distCanvas.getContext("2d"), {
+        type: "doughnut",
+        data: {
+          labels: ["Deposits", "Withdrawals", "Transfers"],
+          datasets: [
+            {
+              data: [data.dist.deposits, data.dist.withdrawals, data.dist.transfers],
+              borderWidth: 0,
+              cutout: "72%"
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                color: tickColor,
+                boxWidth: 12,
+                boxHeight: 12,
+                padding: 16,
+                font: { size: 12, weight: "500" }
+              }
+            },
+            tooltip: {
+              titleColor: "#fff",
+              bodyColor: "#fff"
+            }
+          }
+        }
+      });
+    }
+  </script>
+</div>
+{% endblock %}

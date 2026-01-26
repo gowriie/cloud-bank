@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h2>Fraud Detection & Alerts</h2>
+    <div class="muted">Monitor and resolve suspicious activities.</div>
+  </div>
+</div>
+
+<div class="grid2">
+  <div class="card">
+    <h3>Active Alerts</h3>
+    {% if active %}
+      {% for a in active %}
+        <div class="alertbox">
+          <div class="row">
+            <div>
+              <b>{{ a.title }}</b>
+              <div class="muted small">{{ a.details }}</div>
+              <div class="muted small">Created: {{ a.created_at }} | Severity: {{ a.severity }}</div>
+            </div>
+            <form method="post">
+              <input type="hidden" name="alert_id" value="{{ a.alert_id }}">
+              <button class="btn ghost" type="submit">Mark Resolved</button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="muted">No active alerts.</div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h3>Resolved</h3>
+    {% if resolved %}
+      {% for a in resolved %}
+        <div class="alertbox">
+          <b>{{ a.title }}</b>
+          <div class="muted small">{{ a.details }}</div>
+          <div class="muted small">Resolved: {{ a.resolved_at }}</div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="muted">No resolved alerts yet.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
