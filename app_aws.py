@@ -39,14 +39,14 @@ EMAIL_RE = re.compile(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$")
 PHONE_RE = re.compile(r"^\d{10}$")
 UPI_RE = re.compile(r"^[a-z0-9.\-_]{2,}@[a-z]{2,}$")
 
-
 def d2(x):
     return Decimal(str(x)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
-
 def f2(x):
     try:
-        return float(x)
+        if x is None:
+            return 0.0
+        return float(Decimal(str(x)))
     except Exception:
         return 0.0
 
@@ -62,21 +62,17 @@ def send_notification(subject: str, message: str):
     except ClientError as e:
         print("SNS error:", e)
 
-
 def parse_ts(ts: str):
     try:
         return datetime.strptime(ts, "%Y-%m-%d %H:%M:%S")
     except Exception:
         return None
 
-
 def format_inr(amount):
     amt = f2(amount)
     return f"₹{amt:,.2f}"
 
-
 app.jinja_env.filters["inr"] = format_inr
-
 
 def is_logged_in():
     return "user_id" in session
@@ -165,15 +161,38 @@ def create_user(name, email, phone, upi, password, role="customer"):
     return user
 
 
-def update_user_balance(user_id: str, new_balance):
+def update_user_balance(user_id: str, delta):
     try:
         users_table.update_item(
             Key={"user_id": user_id},
-            UpdateExpression="SET balance = :b",
-            ExpressionAttributeValues={":b": d2(new_balance)}
+            UpdateExpression="SET balance = if_not_exists(balance, :z) + :d",
+            ExpressionAttributeValues={
+                ":d": d2(delta),
+                ":z": d2(0)
+            }
         )
+        return True
     except ClientError as e:
         print("Balance update error:", e)
+        return False
+    
+def deduct_user_balance(user_id: str, amount):
+    try:
+        users_table.update_item(
+            Key={"user_id": user_id},
+            UpdateExpression="SET balance = if_not_exists(balance, :z) - :a",
+            ConditionExpression="if_not_exists(balance, :z) >= :a",
+            ExpressionAttributeValues={
+                ":a": d2(amount),
+                ":z": d2(0)
+            }
+        )
+        return True
+    except ClientError as e:
+        if e.response.get("Error", {}).get("Code") == "ConditionalCheckFailedException":
+            return False
+        print("Deduct error:", e)
+        return False
 
 
 def log_tx(tx_type, actor_user_id, amount, to_user_id=None, meta=None):
@@ -217,15 +236,12 @@ def customer_only_users():
 def all_transactions():
     return scan_all(tx_table)
 
-
 def all_alerts():
     return scan_all(alerts_table)
-
 
 def customer_transactions(user_id):
     txs = all_transactions()
     return [t for t in txs if t.get("from_user_id") == user_id or t.get("to_user_id") == user_id]
-
 
 def sum_amount(tx_list, tx_type, user_id=None):
     total = 0.0
@@ -240,11 +256,9 @@ def sum_amount(tx_list, tx_type, user_id=None):
         total += f2(t.get("amount", 0))
     return round(total, 2)
 
-
 @app.route("/")
 def index():
     return render_template("index.html", logged_in=is_logged_in(), user=current_user())
-
 
 @app.route("/about")
 def about():
@@ -406,7 +420,6 @@ def customer_dashboard():
         }
     )
 
-
 @app.route("/customer/transactions", methods=["GET", "POST"])
 def customer_transactions_page():
     if not is_logged_in():
@@ -430,8 +443,10 @@ def customer_transactions_page():
                 flash("❌ Deposit must be greater than zero.", "error")
                 return redirect(url_for("customer_transactions_page", mode="deposit"))
 
-            new_bal = f2(user.get("balance", 0)) + amount
-            update_user_balance(user["user_id"], new_bal)
+            ok = update_user_balance(user["user_id"], amount)
+            if not ok:
+                flash("❌ Deposit failed. Please try again.", "error")
+                return redirect(url_for("customer_transactions_page", mode="deposit"))
             log_tx("deposit", user["user_id"], amount)
 
             flash(f"✅ Deposited {format_inr(amount)} successfully.", "success")
@@ -447,12 +462,12 @@ def customer_transactions_page():
                 flash("❌ Withdrawal must be greater than zero.", "error")
                 return redirect(url_for("customer_transactions_page", mode="withdraw"))
 
-            if amount > f2(user.get("balance", 0)):
+            # Transaction-safe deduction (prevents negative balance even in concurrency)
+            ok = deduct_user_balance(user["user_id"], amount)
+            if not ok:
                 flash("❌ Insufficient balance.", "error")
                 return redirect(url_for("customer_transactions_page", mode="withdraw"))
 
-            new_bal = f2(user.get("balance", 0)) - amount
-            update_user_balance(user["user_id"], new_bal)
             tx = log_tx("withdraw", user["user_id"], amount)
 
             if amount >= LARGE_WITHDRAWAL:
@@ -480,10 +495,6 @@ def customer_transactions_page():
                 flash("❌ Transfer must be greater than zero.", "error")
                 return redirect(url_for("customer_transactions_page", mode="transfer"))
 
-            if amount > f2(user.get("balance", 0)):
-                flash("❌ Insufficient balance.", "error")
-                return redirect(url_for("customer_transactions_page", mode="transfer"))
-
             if not identifier_value:
                 flash("❌ Enter receiver phone/UPI.", "error")
                 return redirect(url_for("customer_transactions_page", mode="transfer"))
@@ -509,10 +520,19 @@ def customer_transactions_page():
                 flash("❌ Cannot transfer to your own account.", "error")
                 return redirect(url_for("customer_transactions_page", mode="transfer"))
 
-            sender_new = f2(user.get("balance", 0)) - amount
-            recv_new = f2(receiver.get("balance", 0)) + amount
-            update_user_balance(user["user_id"], sender_new)
-            update_user_balance(receiver["user_id"], recv_new)
+            # deduct from sender (transaction-safe)
+            ok = deduct_user_balance(user["user_id"], amount)
+            if not ok:
+                flash("❌ Insufficient balance.", "error")
+                return redirect(url_for("customer_transactions_page", mode="transfer"))
+
+            # add to receiver
+            credited = update_user_balance(receiver["user_id"], amount)
+            if not credited:
+                
+                update_user_balance(user["user_id"], amount)
+                flash("❌ Transfer failed. Please try again.", "error")
+                return redirect(url_for("customer_transactions_page", mode="transfer"))
 
             tx = log_tx(
                 "transfer",
