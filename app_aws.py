@@ -22,7 +22,7 @@ USERS_TABLE_NAME = os.environ.get("USERS_TABLE_NAME", "CloudBankUsers")
 TX_TABLE_NAME = os.environ.get("TX_TABLE_NAME", "CloudBankTransactions")
 ALERTS_TABLE_NAME = os.environ.get("ALERTS_TABLE_NAME", "CloudBankAlerts")
 
-SNS_TOPIC_ARN = ""
+SNS_TOPIC_ARN = "arn:aws:sns:us-east-1:412381764362:cloud_bank_topic"
 
 dynamodb = boto3.resource("dynamodb", region_name=REGION)
 users_table = dynamodb.Table(USERS_TABLE_NAME)
