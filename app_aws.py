@@ -462,7 +462,11 @@ def customer_transactions_page():
                 flash("❌ Withdrawal must be greater than zero.", "error")
                 return redirect(url_for("customer_transactions_page", mode="withdraw"))
 
-            # Transaction-safe deduction (prevents negative balance even in concurrency)
+            fresh = get_user_by_id(user["user_id"])
+            print("DEBUG user_id:", user["user_id"])
+            print("DEBUG db_balance raw:", fresh.get("balance") if fresh else None)
+            print("DEBUG db_balance float:", f2(fresh.get("balance")) if fresh else None)
+            print("DEBUG requested amount:", amount)
             ok = deduct_user_balance(user["user_id"], amount)
             if not ok:
                 flash("❌ Insufficient balance.", "error")
@@ -521,6 +525,11 @@ def customer_transactions_page():
                 return redirect(url_for("customer_transactions_page", mode="transfer"))
 
             # deduct from sender (transaction-safe)
+            fresh = get_user_by_id(user["user_id"])
+            print("DEBUG user_id:", user["user_id"])
+            print("DEBUG db_balance raw:", fresh.get("balance") if fresh else None)
+            print("DEBUG db_balance float:", f2(fresh.get("balance")) if fresh else None)
+            print("DEBUG requested amount:", amount)
             ok = deduct_user_balance(user["user_id"], amount)
             if not ok:
                 flash("❌ Insufficient balance.", "error")
