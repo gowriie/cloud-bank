@@ -180,11 +180,10 @@ def deduct_user_balance(user_id: str, amount):
     try:
         users_table.update_item(
             Key={"user_id": user_id},
-            UpdateExpression="SET balance = if_not_exists(balance, :z) - :a",
-            ConditionExpression="if_not_exists(balance, :z) >= :a",
+            UpdateExpression="SET balance = balance - :a",
+            ConditionExpression="balance >= :a",
             ExpressionAttributeValues={
                 ":a": d2(amount),
-                ":z": d2(0)
             }
         )
         return True
@@ -193,7 +192,6 @@ def deduct_user_balance(user_id: str, amount):
             return False
         print("Deduct error:", e)
         return False
-
 
 def log_tx(tx_type, actor_user_id, amount, to_user_id=None, meta=None):
     tx = {
